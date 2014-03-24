@@ -6,14 +6,14 @@ if [ "$1" == "log4j" ] ;then
 	fi
 	if [ ! -f log4j/log4j-1.2.14.jar ]; then	
 		
-		 #command -v mvn >/dev/null 2>&1 || { echo "Maven not installed. Aborting." >&2; exit 1;}
+		 command -v mvn >/dev/null 2>&1 || { echo "Maven not installed. Aborting." >&2; exit 1;}
 		 mvn org.apache.maven.plugins:maven-dependency-plugin:2.4:get \
                    -Dartifact=log4j:log4j:1.2.14 \
                    -Ddest=log4j/log4j-1.2.14.jar \
                    -Dtransitive=false \
                    
 	fi
-	#command -v java >/dev/null 2>&1 || { echo "Java not installed. Aborting." >&2; exit 1;}
+	command -v java >/dev/null 2>&1 || { echo "Java not installed. Aborting." >&2; exit 1;}
 	javac -cp log4j/*:.  log4j/Log4jSocketAppenderExample.java
 	if [ -f log4j/Log4jSocketAppenderExample.class ]; then
 			chmod 755 log4j/Log4jSocketAppenderExample.class	
