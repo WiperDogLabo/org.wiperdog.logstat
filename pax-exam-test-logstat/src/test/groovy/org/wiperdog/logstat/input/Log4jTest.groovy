@@ -54,8 +54,8 @@ public class Log4jTest {
 	BufferedReader br;
 	String line;
 	String result;
-//	ProcessBuilder builder;
-//	Process proc;
+	ProcessBuilder builder;
+	Process proc;
 	TestUTCommon test_common = new TestUTCommon();
 	
 	/**
@@ -80,24 +80,23 @@ public class Log4jTest {
 		input_conf.put("input_type", "log4j");
 		try {
 			svc = context.getService(context.getServiceReference(LogStat.class.getName()));
-			//Run logs_generator script
-//			def logs_gen_dir = wd + "/logs_generator"
-//			def listCmd = new ArrayList<String>();
-//			listCmd.add("./logs_generator.sh");
-//			listCmd.add("log4j")
-//			builder = new ProcessBuilder();
-//			builder.directory(new File(logs_gen_dir))
-//			builder.command(listCmd);
-//			//builder.redirectErrorStream(true);
-//			proc = builder.start();
-//			def err = proc.getErrorStream();
-//			def errReader = new InputStreamReader(err);
-//			BufferedReader bf = new BufferedReader(errReader);
-//			String line = null;
-//			while((line = bf.readLine()) != null){
-//				println line
-//				
-//			}
+			def logs_gen_dir = wd + "/logs_generator"			
+			def listCmd = new ArrayList<String>();
+			listCmd.add("./logs_generator.sh");
+			listCmd.add("log4j")
+			builder = new ProcessBuilder();
+			builder.directory(new File(logs_gen_dir))
+			builder.command(listCmd);
+			proc = builder.start();
+			def err = proc.getErrorStream();
+			def errReader = new InputStreamReader(err);
+			BufferedReader bf = new BufferedReader(errReader);
+			String line = null;
+			while((line = bf.readLine()) != null){		
+				if(line.contains("Connection refused")){
+					break;
+				}
+			}
 			
 			Thread.sleep(5000)
 		} catch (Exception e) {
@@ -107,7 +106,7 @@ public class Log4jTest {
 
 	@After
 	public void finish() {
-		//proc.destroy();
+		proc.destroy();
 	}
 
 	/**
