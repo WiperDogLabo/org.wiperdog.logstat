@@ -27,7 +27,6 @@ public class Log4jTest {
 
 	@Inject
 	private org.osgi.framework.BundleContext context;
-	String wd = System.getProperty("user.dir");
 	@Configuration
 	public Option[] config() {
 		return options(
@@ -40,7 +39,9 @@ public class Log4jTest {
 		// Pax-exam make this test code into OSGi bundle at runtime, so
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
-		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
 		junitBundles()
 		);
@@ -57,7 +58,9 @@ public class Log4jTest {
 	ProcessBuilder builder;
 	Process proc;
 	TestUTCommon test_common = new TestUTCommon();
-	
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
+
 	/**
 	 * Need to run logs_generator seperate from terminal
 	 */
@@ -78,6 +81,7 @@ public class Log4jTest {
 		]
 		// get data of log4j
 		input_conf.put("input_type", "log4j");
+		logstatDir = wd + "/src/test/resources/logstat"		
 		try {
 			svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 			def logs_gen_dir = wd + "/logs_generator"			
@@ -123,7 +127,7 @@ public class Log4jTest {
 		def outFile = ["path":"src/test/resources/data_test/input/testLog4j/output/testLog4j_01.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_01.log")		
-		svc.runLogStat(conf);
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testLog4j/output/testLog4j_01.log");
 		assertNotNull(result)
@@ -146,7 +150,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_02.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testLog4j/output/testLog4j_02.log");
 		assertNotNull(result)
@@ -169,7 +173,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_03.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testLog4j/output/testLog4j_03.log");
 		assertNotNull(result)
@@ -192,7 +196,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_04.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testLog4j/output/testLog4j_04.log");
 		assertNotNull(result)
@@ -214,7 +218,7 @@ public class Log4jTest {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File("src/test/resources/data_test/input/testLog4j/output/testLog4j_05.log")).exists())
 		Thread.sleep(3000)
 	}
@@ -233,7 +237,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_06.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File("src/test/resources/data_test/input/testLog4j/output/testLog4j_06.log")).exists())
 		Thread.sleep(3000)
 	}
@@ -254,7 +258,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_07.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertTrue((new File("src/test/resources/data_test/input/testLog4j/output/testLog4j_07.log")).exists())
 		Thread.sleep(3000)
 	}
@@ -274,7 +278,7 @@ public class Log4jTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 		test_common.cleanData("src/test/resources/data_test/input/testLog4j/output/testLog4j_08.log")		
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testLog4j/output/testLog4j_08.log");
 		assertNotNull(result)

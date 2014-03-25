@@ -23,7 +23,6 @@ public class SocketTest {
 
 	@Inject
 	private org.osgi.framework.BundleContext context;
-	String wd = System.getProperty("user.dir");
 	@Configuration
 	public Option[] config() {
 		return options(
@@ -36,7 +35,9 @@ public class SocketTest {
 		// Pax-exam make this test code into OSGi bundle at runtime, so
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
-		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
 		junitBundles()
 		);
@@ -53,6 +54,8 @@ public class SocketTest {
 	Process proc;
 	String result;
 	TestUTCommon test_common = new TestUTCommon();
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
 
 	@Before
 	public void prepare() {
@@ -71,6 +74,8 @@ public class SocketTest {
 		]
 		// get data of socket log
 		input_conf.put("input_type", "socket");
+		logstatDir = wd + "/src/test/resources/logstat"
+		
 		try {
 			svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 			//Run logs_generator script
@@ -113,7 +118,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf);
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testSocket/output/testSocket_01.log");
 		assertNotNull(result)
@@ -136,7 +141,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testSocket/output/testSocket_02.log");
 		assertNotNull(result)
@@ -160,7 +165,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testSocket/output/testSocket_03.log");
 		assertNotNull(result)
@@ -185,7 +190,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testSocket/output/testSocket_04.log");
 		assertNotNull(result)
@@ -208,7 +213,7 @@ public class SocketTest {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 
 		assertFalse((new File("src/test/resources/data_test/input/testSocket/output/testSocket_05.log")).exists())
 		Thread.sleep(3000)
@@ -230,7 +235,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File("src/test/resources/data_test/input/testSocket/output/testSocket_06.log")).exists())
 		Thread.sleep(3000)
 	}
@@ -252,7 +257,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File("src/test/resources/data_test/input/testSocket/output/testSocket_07.log")).exists())
 		Thread.sleep(3000)
 	}
@@ -274,7 +279,7 @@ public class SocketTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput("src/test/resources/data_test/input/testSocket/output/testSocket_08.log");
 		assertNotNull(result)

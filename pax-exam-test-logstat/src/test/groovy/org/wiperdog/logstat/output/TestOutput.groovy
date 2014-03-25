@@ -1,13 +1,16 @@
 package org.wiperdog.logstat.output;
 
+import groovy.json.JsonBuilder;
+import groovy.json.JsonSlurper;
+
 import javax.inject.Inject;
+
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -25,12 +28,10 @@ import org.jruby.embed.ScriptingContainer;
 @ExamReactorStrategy(PerClass.class)
 public class TestOutput {
 	public TestOutput() {
-
 	}
 
 	@Inject
 	private org.osgi.framework.BundleContext context;
-	String wd = System.getProperty("user.dir");
 	@Configuration
 	public Option[] config() {
 		return options(
@@ -44,6 +45,8 @@ public class TestOutput {
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
 		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
 		junitBundles()
 		);
@@ -60,7 +63,9 @@ public class TestOutput {
 	String result;
 	String expected;
 	String logs_test_dir;
-
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
+	def outFile ;
 	@Before
 	public void prepare() {
 		input_conf = new HashMap<String, Object>();
@@ -86,12 +91,14 @@ public class TestOutput {
 		input_conf.put("start_pos", 3);
 		//input_conf.put("asc_by_fname", true);
 		// set output config
+		outFile = wd + "/src/test/resources/data_test/output/output/output.log"
 		output_conf.put("type", "file");
 		configOutput = [
-			"path": wd + "/output.log"
+			"path": outFile
 		]
 		output_conf.put("config", configOutput);
-		new File(wd + "/output.log").delete();
+		logstatDir = wd + "/src/test/resources/logstat"
+		new File(outFile).delete();
 		try {
 			svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 		} catch (Exception e) {
@@ -101,7 +108,7 @@ public class TestOutput {
 
 	@After
 	public void finish() {
-		//new File(wd + "/output.log").delete();
+		//new File(outFile).delete();
 	}
 
 	//===========================Check output to File===============================
@@ -113,14 +120,16 @@ public class TestOutput {
 	 */
 	@Test
 	public void testOutput_01() {
+
 		input_conf.put("start_file_name", "result_testString_01.log");
 
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
-		result = (new File(wd + "/output.log")).text
+		assertTrue(new File(outFile).exists())
+		result = (new File(outFile)).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/output/expected/expected_testString_01.log")).text
 		assertNotNull(result)
@@ -146,8 +155,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	/**
@@ -169,8 +178,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	/**
@@ -192,8 +201,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	/**
@@ -215,8 +224,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	/**
@@ -234,8 +243,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	/**
@@ -255,8 +264,8 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
-		assertFalse((new File(wd + "/output.log")).exists())
+		svc.runLogStat(logstatDir,conf)
+		assertFalse((new File(outFile)).exists())
 	}
 
 	//===========================Check output of Job================================
@@ -275,10 +284,12 @@ public class TestOutput {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		result = svc.runLogStat(conf)
-		expected = (new File(wd + "/src/test/resources/data_test/output/expected/expected_testString_02.log")).text
+		Map<String,Object> result = svc.runLogStat(logstatDir,conf)
+		JsonSlurper js = new JsonSlurper();
+		//expected = (new File(wd + "/src/test/resources/data_test/output/expected/expected_testString_02.log")).text
 		assertNotNull(result)
-		assertEquals(expected, result);
+		def objExpected = js.parse(new File(wd + "/src/test/resources/data_test/output/expected/expected_testString_02.log"))
+		assertEquals(result['persistent_data']['start_file_name'], objExpected['persistent_data']['start_file_name']);
 	}
 
 }

@@ -1,12 +1,12 @@
 package org.wiperdog.logstat.input;
 import javax.inject.Inject;
+
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -29,7 +29,6 @@ public class SyslogTest {
 
 	@Inject
 	private org.osgi.framework.BundleContext context;
-	String wd = System.getProperty("user.dir");
 	@Configuration
 	public Option[] config() {
 		return options(
@@ -42,9 +41,10 @@ public class SyslogTest {
 		// Pax-exam make this test code into OSGi bundle at runtime, so
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
-		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
-		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
-		junitBundles()
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),		junitBundles()
 		);
 	}
 
@@ -58,6 +58,8 @@ public class SyslogTest {
 	String result;
 	String expected;
 	String inputStr;
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
 
 	@Before
 	public void prepare() {
@@ -82,7 +84,8 @@ public class SyslogTest {
 		input_conf.put("input_type", "sys_log");
 		// set data for log
 		inputStr = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/messages");
-		FileWriter fw = new FileWriter("/usr/messages")
+		logstatDir = wd + "/src/test/resources/logstat"		
+		FileWriter fw = new FileWriter("/home/luongnx/testSyslog")
 		fw.write(inputStr);
 		fw.close();
 
@@ -114,7 +117,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/output/testSyslog_01.log");
 		expected = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/expected_test01.log");
@@ -136,7 +139,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 
 		assertFalse(new File(wd + "/output.log").exists())
 	}
@@ -157,7 +160,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse(new File(wd + "/output.log").exists())	}
 
 	/**
@@ -176,7 +179,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse(new File(wd + "/output.log").exists())
 	}
 
@@ -196,7 +199,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse(new File(wd + "/output.log").exists());
 	}
 
@@ -216,7 +219,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse(new File(wd + "/output.log").exists());
 	}
 
@@ -236,7 +239,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// result data
 		result = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/output/testSyslog_07.log");
 		expected = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/expected_test02.log");
@@ -257,7 +260,7 @@ public class SyslogTest {
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
 
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse(new File(wd + "/src/test/resources/data_test/input/testSyslog/output/testSyslog_08.log").exists())
 	}
 

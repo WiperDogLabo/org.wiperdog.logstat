@@ -1,6 +1,6 @@
 package org.wiperdog.logstat.service;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * LogStat service
@@ -8,5 +8,5 @@ import java.util.HashMap;
  *
  */
 public interface LogStat {
-	public String runLogStat(HashMap<String, Object> conf);
+	public Map<String,Object> runLogStat(String logStatDir,Map<String,Object> conf);
 }

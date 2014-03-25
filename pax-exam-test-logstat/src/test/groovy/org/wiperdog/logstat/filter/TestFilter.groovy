@@ -1,12 +1,12 @@
 package org.wiperdog.logstat.filter;
 import javax.inject.Inject;
+
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.*;
- 
+
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -25,28 +25,31 @@ import org.wiperdog.logstat.common.TestUTCommon;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class TestFilter {
-    public TestFilter() {}
+	public TestFilter() {
+
+	}
 
 	@Inject
 	private org.osgi.framework.BundleContext context;
-	String wd = System.getProperty("user.dir");
-    @Configuration
-    public Option[] config() {
-        return options(
-			cleanCaches(true),
-			frameworkStartLevel(6),
-			// felix log level
-			systemProperty("felix.log.level").value("4"), // 4 = DEBUG
-			// setup properties for fileinstall bundle.
-			systemProperty("felix.home").value(wd),
-			// Pax-exam make this test code into OSGi bundle at runtime, so 
-			// we need "groovy-all" bundle to use this groovy test code.
-            mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
-			mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
-			mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
-            junitBundles()
+	@Configuration
+	public Option[] config() {
+		return options(
+		cleanCaches(true),
+		frameworkStartLevel(6),
+		// felix log level
+		systemProperty("felix.log.level").value("4"), // 4 = DEBUG
+		// setup properties for fileinstall bundle.
+		systemProperty("felix.home").value(wd),
+		// Pax-exam make this test code into OSGi bundle at runtime, so
+		// we need "groovy-all" bundle to use this groovy test code.
+		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
+		junitBundles()
 		);
-    }
+	}
 
 	private LogStat svc;
 	HashMap<String , Object> input_conf;
@@ -58,7 +61,10 @@ public class TestFilter {
 	String result;
 	String expected;
 	String logs_test_dir;
-	TestUTCommon test_common = new TestUTCommon();	
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
+
+	TestUTCommon test_common = new TestUTCommon();
 	@Before
 	public void prepare() {
 		input_conf = new HashMap<String, Object>();
@@ -67,6 +73,7 @@ public class TestFilter {
 		conf = new HashMap<String, Object>();
 		result = "";
 		expected = "";
+		logstatDir = wd + "/src/test/resources/logstat"
 		logs_test_dir = wd + "/src/test/resources/data_test/filter/testFilter";
 		// filter data of log
 		filter = [
@@ -85,7 +92,7 @@ public class TestFilter {
 		input_conf.put("start_pos", 3);
 		//input_conf.put("asc_by_fname", true);
 		// set output config
-		output_conf.put("type", "file");		
+		output_conf.put("type", "file");
 		try {
 			svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 		} catch (Exception e) {
@@ -97,7 +104,7 @@ public class TestFilter {
 	public void finish() {
 		//new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_01.log").delete();
 	}
-	
+
 	//===========================Check data input is String===============================
 	/**
 	 * Check func with all of variable: typeRegx, mapFilterConf and list_logs is true.
@@ -105,22 +112,22 @@ public class TestFilter {
 	 * Record log mapping with mapFilterConf.
 	 * Expected: return all of data corresponding to input data.  
 	 */
-   @Test
-    public void testFilter_01() {
+	@Test
+	public void testFilter_01() {
 		input_conf.put("start_file_name", "result_testString_01.log");
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_01.output")		
+		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_01.output")
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_01.log"]
 		output_conf.put("config", outFile)
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_01.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testString_01.log")).text
-    }
-	
+	}
+
 	/**
 	 * Check func with value of typeRegx is 'match_field'. 
 	 * One or more record does not mapping with all of variable into mapFilterConf.
@@ -133,7 +140,7 @@ public class TestFilter {
 		output_conf.put("config", outFile)
 		// filter data of log
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_02.output")
-		
+
 		filter = new HashMap<String, Object>();
 		filter = [
 			"filter_type" : "match_field",
@@ -145,14 +152,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_02.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testString_02.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record'.
 	 * Value of mapFilterConf['format_log'] and mapFilterConf['data'] is mapped to record log.
@@ -165,7 +172,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_03.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_03.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -182,14 +189,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_03.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testString_03.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record'.
 	 * One or more record does not mapping with mapFilterConf['format_log'] and mapFilterConf['data'].
@@ -202,7 +209,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_04.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_04.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -219,14 +226,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_04.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testString_04.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record' and mapFilterConf['format_log'] is empty.
 	 * Expected: data cannot return => not create file output.log
@@ -238,7 +245,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_05.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_05.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -255,10 +262,10 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_05.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record' and mapFilterConf['format_log'] is null.
 	 * Expected: data cannot return => not create file output.log
@@ -270,7 +277,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_06.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_06.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -287,38 +294,37 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_06.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record' and mapFilterConf['data'] is empty.
 	 * Expected: data cannot return => not create file output.log
 	 */
-   @Test
+	@Test
 	public void testFilter_07() {
 		input_conf.put("start_pos", 1);
 		input_conf.put("start_file_name", "result_testString_04.log");
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_07.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_07.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
 			"filter_type" : "match_log_record",
 			"filter_conf" : [
 				"format_log" : "Toi la (\\w*), toi (\\d{2}) tuoi, que((\\s(\\w*))*)",
-				"data" : []
-			]
+				"data" : []]
 		]
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_07.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is 'match_log_record' and mapFilterConf['data'] is null.
 	 * Expected: data cannot return => not create file output.log
@@ -330,7 +336,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_08.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_08.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -343,10 +349,10 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_08.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is empty.
 	 * Expected: return data is empty => not create file output.log
@@ -358,7 +364,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_09.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_09.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -375,10 +381,10 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_09.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of typeRegx is null.
 	 * Expected: return data is empty => not create file output.log
@@ -390,7 +396,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_10.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_10.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -407,10 +413,10 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_10.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of mapFilterConf is empty.
 	 * Expected: return data is empty => not create file output.log
@@ -421,21 +427,20 @@ public class TestFilter {
 		input_conf.put("start_file_name", "result_testString_04.log");
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_11.log"]
 		output_conf.put("config", outFile)
-		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_11.output")		
+		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_11.output")
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
 			"filter_type" : "match_log_record",
-			"filter_conf" : []
-		]
+			"filter_conf" : []]
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_11.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of mapFilterConf is null.
 	 * Expected: return data is empty => not create file output.log
@@ -447,7 +452,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_12.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_12.output")
-		
+
 		// filter data of log
 		filter = new HashMap<String, Object>();
 		filter = [
@@ -457,11 +462,11 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_12.log")).exists())
 	}
-	
+
 	//===========================Check data input is Map===================================
 	/**
 	 * Check func with all of variable: mapFilterConf and list_logs is true.
@@ -475,7 +480,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_13.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_13.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -495,14 +500,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_13.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_01.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf does not contain 'data_field'.
@@ -516,7 +521,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_14.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_14.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -530,14 +535,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_14.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_02.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf['data_field'] is list empty.
@@ -551,7 +556,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_15.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_15.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -566,14 +571,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_15.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_02.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf['data_field'] is null.
@@ -587,7 +592,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_16.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_16.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -602,14 +607,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_16.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_02.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf does not contain 'filter'.
@@ -623,7 +628,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_17.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_17.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -638,14 +643,14 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_17.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_03.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf['filter'] has no corresponding format to record of log.
@@ -658,7 +663,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_18.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_18.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -678,10 +683,10 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		assertFalse((new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_18.log")).exists())
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf['filter'] is map empty.
@@ -695,7 +700,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_19.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_19.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -705,20 +710,19 @@ public class TestFilter {
 					"time",
 					"message"
 				],
-				"filter" : []
-			]
+				"filter" : []]
 		]
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_19.log")).text
 		// get data expected to comparse
 		expected = (new File(wd + "/src/test/resources/data_test/filter/testFilter/expected/expected_testMap_03.log")).text
 		assertEquals(expected,result);
 	}
-	
+
 	/**
 	 * Check func with value of list_logs is true.
 	 * Value of mapFilterConf['filter'] is null.
@@ -732,7 +736,7 @@ public class TestFilter {
 		def outFile = ["path": wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_20.log"]
 		output_conf.put("config", outFile)
 		test_common.cleanData("src/test/resources/data_test/input/testFilter/output/testFilter_20.output")
-		
+
 		// filter data of log
 		filter = [
 			"filter_type" : "",
@@ -748,7 +752,7 @@ public class TestFilter {
 		conf.put("input",input_conf);
 		conf.put("filter",filter);
 		conf.put("output",output_conf);
-		svc.runLogStat(conf)
+		svc.runLogStat(logstatDir,conf)
 		// get output data of func
 		result = (new File(wd + "/src/test/resources/data_test/filter/testFilter/output/testFilter_20.log")).text
 		// get data expected to comparse

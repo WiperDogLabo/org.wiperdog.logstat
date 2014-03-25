@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.wiperdog</groupId>	
-	<artifactId>org.wiperdog.logstat</artifactId>	
+	<groupId>org.wiperdog</groupId>
+	<artifactId>org.wiperdog.logstat</artifactId>
 	<name>${bundle.symbolicName}</name>
 	<version>1.0</version>
 	<packaging>bundle</packaging>
@@ -21,6 +21,11 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wiperdog</groupId>
+			<artifactId>org.wiperdog.jrubyrunner</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 	<build>

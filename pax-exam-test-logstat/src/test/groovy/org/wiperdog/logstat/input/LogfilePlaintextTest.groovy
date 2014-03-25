@@ -48,8 +48,11 @@ public class LogfilePlaintextTest {
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
 		// wrappedBundle(mavenBundle("org.jruby", "jruby-complete", "1.7.10")),
-		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
+
 		junitBundles()
 		);
 	}
@@ -58,6 +61,9 @@ public class LogfilePlaintextTest {
 	private LogStat svc;
 	private String currentDir = "";
 	private String logs_test_dir = "";
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
+
 	TestUTCommon test_common = new TestUTCommon();
 	HashMap<String , Object> input_conf = new HashMap<String, Object>();
 	HashMap<String , Object> output_conf = new HashMap<String, Object>();
@@ -71,7 +77,11 @@ public class LogfilePlaintextTest {
 		logs_test_dir = currentDir + "/src/test/resources/data_test/input/testPlainText";
 		svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 		output_conf.put("type", "file");
-
+		def listLogFile = ["logfile1.log","logfile2.log","logfile3.log"]
+		listLogFile.each {
+			test_common.changeFileModifiedTime(logs_test_dir + "/$it")
+			Thread.sleep(1000)
+		}
 
 		filter_conf = [
 			"filter_type" : "match_field",
@@ -83,6 +93,7 @@ public class LogfilePlaintextTest {
 		]
 		
 		input_conf.put("input_type", "file");
+		logstatDir = wd + "/src/test/resources/logstat"
 	}
 
 	@After
@@ -112,7 +123,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine0.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine0.output"))
 		} catch(Exception ex){
 			println ex
@@ -142,7 +153,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine1.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine1.output"))
 		} catch(Exception ex){
 			println ex
@@ -171,7 +182,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine2.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine2.output"))
 		} catch(Exception ex){
 			println ex
@@ -200,7 +211,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine3.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine3.output"))
 		} catch(Exception ex){
 			println ex
@@ -228,7 +239,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertFalse(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine4.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine4.output"))
 		} catch(Exception ex){
 			println ex
@@ -258,7 +269,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByLine5.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByLine5.output"))
 		} catch(Exception ex){
 			println ex
@@ -291,7 +302,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByDate0.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByDate0.output"))
 		} catch(Exception ex){
 			println ex
@@ -322,7 +333,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByDate1.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByDate1.output"))
 		} catch(Exception ex){
 			println ex
@@ -353,7 +364,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByDate2.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByDate2.output"))
 		} catch(Exception ex){
 			println ex
@@ -383,7 +394,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByDate3.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByDate3.output"))
 		} catch(Exception ex){
 			println ex
@@ -413,7 +424,7 @@ public class LogfilePlaintextTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertFalse(test_common.compareData("src/test/resources/data_test/input/testPlainText/expected/testPlainTextByDate4.output","src/test/resources/data_test/input/testPlainText/output/testPlainTextByDate4.output"))
 		} catch(Exception ex){
 			println ex

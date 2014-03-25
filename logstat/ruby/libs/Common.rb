@@ -4,7 +4,7 @@ module CommonUtils
       require gem
     rescue LoadError => e
       require 'fileutils'
-      dirname = get_jar_path + "/gemdir"
+      dirname = "logstat/gemdir"
       find = false
       Dir.glob(dirname + "/gems/" + gem + "*/").each {|subdir|
         gemlibsdir = subdir + "/lib"

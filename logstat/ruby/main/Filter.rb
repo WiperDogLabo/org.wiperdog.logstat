@@ -1,4 +1,4 @@
-require 'ruby/ProcessInput'
+require 'logstat/ruby/main/Input'
 require 'date'
 
 ##

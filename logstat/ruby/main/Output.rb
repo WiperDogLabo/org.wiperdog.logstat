@@ -1,4 +1,4 @@
-require 'ruby/libs/Common.rb'
+require 'logstat/ruby/libs/Common.rb'
 
 include CommonUtils
 
@@ -40,7 +40,7 @@ class ProcessOutput
           self.sendToServlet(data['list_logs'], output_conf['config'], map_default_output)
         elsif outputType == "job" # Out to output job format
           # Call method process put out format of job's output
-	  dataFromOutput = self.putOutJobFormat(data)
+          return data
         end
       else
         puts "[Logstat]: No data to output !"
@@ -48,7 +48,7 @@ class ProcessOutput
     else
       puts "[Logstat]: No data to output !"
     end
-    return dataFromOutput
+    return nil
   end
 
   ##
@@ -118,6 +118,7 @@ class ProcessOutput
     else
       puts "[Logstat]: Must be config information (host, port, dbName, user, pass) to put data to MongoDB !!!"
     end
+    
   end
 
   ##
@@ -150,16 +151,4 @@ class ProcessOutput
     response = Net::HTTP.new(@host, @port).start {|http| http.request(request) }
   end
 
-  ##
-  # putOutJobFormat:
-  # @param data: output data to send
-  # @param jobConf: configuration from job
-  # @return data
-  ##
-  def putOutJobFormat(data)
-    CommonUtils.require_gem('rubygems')
-    CommonUtils.require_gem('json')
-    data = JSON(data)
-    return data
-  end
 end

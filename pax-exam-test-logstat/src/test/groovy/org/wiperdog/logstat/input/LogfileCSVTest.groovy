@@ -35,7 +35,7 @@ public class LogfileCSVTest {
 
 	@Configuration
 	public Option[] config() {
-		String wd = System.getProperty("user.dir");
+		
 		return options(
 		cleanCaches(true),
 		frameworkStartLevel(6),
@@ -49,6 +49,8 @@ public class LogfileCSVTest {
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
 		// wrappedBundle(mavenBundle("org.jruby", "jruby-complete", "1.7.10")),
 		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
 		junitBundles()
 		);
@@ -58,6 +60,8 @@ public class LogfileCSVTest {
 	private LogStat svc;
 	private String currentDir = "";
 	private String logs_test_dir = "";
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
 	TestUTCommon test_common = new TestUTCommon();
 	HashMap<String , Object> input_conf = new HashMap<String, Object>();
 	HashMap<String , Object> output_conf = new HashMap<String, Object>();
@@ -71,7 +75,7 @@ public class LogfileCSVTest {
 		logs_test_dir = currentDir + "/src/test/resources/data_test/input/testCSV";
 		svc = context.getService(context.getServiceReference(LogStat.class.getName()));
 		output_conf.put("type", "file");
-
+		logstatDir = wd + "/src/test/resources/logstat"
 
 		filter_conf = [
 			"filter_type" : "match_field",
@@ -113,7 +117,8 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine0.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine0.output"))
 		} catch(Exception ex){
 			println ex
@@ -145,7 +150,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine1.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine1.output"))
 		} catch(Exception ex){
 			println ex
@@ -176,7 +181,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine2.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine2.output"))
 		} catch(Exception ex){
 			println ex
@@ -207,7 +212,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine3.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine3.output"))
 		} catch(Exception ex){
 			println ex
@@ -238,7 +243,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertFalse(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine4.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine4.output"))
 		} catch(Exception ex){
 			println ex
@@ -270,7 +275,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByLine5.output","src/test/resources/data_test/input/testCSV/output/testCSVByLine5.output"))
 		} catch(Exception ex){
 			println ex
@@ -304,7 +309,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByDate0.output","src/test/resources/data_test/input/testCSV/output/testCSVByDate0.output"))
 		} catch(Exception ex){
 			println ex
@@ -336,7 +341,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByDate1.output","src/test/resources/data_test/input/testCSV/output/testCSVByDate1.output"))
 		} catch(Exception ex){
 			println ex
@@ -367,7 +372,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByDate2.output","src/test/resources/data_test/input/testCSV/output/testCSVByDate2.output"))
 		} catch(Exception ex){
 			println ex
@@ -396,7 +401,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByDate3.output","src/test/resources/data_test/input/testCSV/output/testCSVByDate3.output"))
 		} catch(Exception ex){
 			println ex
@@ -424,7 +429,7 @@ public class LogfileCSVTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertFalse(test_common.compareData("src/test/resources/data_test/input/testCSV/expected/testCSVByDate4.output","src/test/resources/data_test/input/testCSV/output/testCSVByDate4.output"))
 		} catch(Exception ex){
 			println ex
