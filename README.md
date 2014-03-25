@@ -8,8 +8,8 @@ Process has 3 parts: Process input, process filter and process output
 For details of process, you can see in folder process
 
 Usage : 
-	- Build logstat with maven
-	- Call logstat service :
+- Build logstat with maven
+- Call logstat service :
 		
 	  LogStat ls ;
           //logstat directory is seperated from  org.wiperdog.logstat bundle ,this directory contains ruby script to process logs monitoring
