@@ -1,5 +1,6 @@
 package org.wiperdog.logstat.common;
 import java.io.File;
+import java.text.SimpleDateFormat;
 public class TestUTCommon {
 	public boolean compareData(String file_path1,String file_path2){
 
@@ -38,7 +39,7 @@ public class TestUTCommon {
 		}
 	}
 	public int countLines(String file_path){
-		int count = 0 
+		int count = 0
 		File file = new File(file_path);
 		file.eachLine {
 			if(it != null && it.trim() != ""){
@@ -46,5 +47,21 @@ public class TestUTCommon {
 			}
 		}
 		return count
+	}
+	public void changeFileModifiedTime(String filePath){
+		File file = new File(filePath);
+
+		//print the original last modified date
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		System.out.println("Original Last Modified Date : "
+				+ sdf.format(file.lastModified()));
+
+		//need convert the above date to milliseconds in long value
+		Date newDate = Calendar.getInstance().getTime();
+		file.setLastModified(newDate.getTime());
+
+		//print the latest last modified date
+		System.out.println("Lastest Last Modified Date : "
+				+ sdf.format(file.lastModified()));
 	}
 }

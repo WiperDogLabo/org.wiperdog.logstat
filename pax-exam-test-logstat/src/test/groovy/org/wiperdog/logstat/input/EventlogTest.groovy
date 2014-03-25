@@ -2,13 +2,13 @@ package org.wiperdog.logstat.input;
 import java.sql.Time;
 
 import javax.inject.Inject;
+
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.CoreOptions.*;
 
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
-
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -21,6 +21,7 @@ import org.junit.runner.JUnitCore;
 import org.osgi.service.cm.ManagedService;
 import org.wiperdog.logstat.service.LogStat;
 import org.wiperdog.logstat.common.TestUTCommon;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -53,7 +54,9 @@ public class EventlogTest {
 		// we need "groovy-all" bundle to use this groovy test code.
 		mavenBundle("org.codehaus.groovy", "groovy-all", "2.2.1").startLevel(2),
 		// wrappedBundle(mavenBundle("org.jruby", "jruby-complete", "1.7.10")),
-		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),
+		mavenBundle("org.jruby", "jruby-complete", "1.7.10").startLevel(2),		
+		mavenBundle("org.wiperdog", "org.wiperdog.directorywatcher", "0.1.0").startLevel(3),
+		mavenBundle("org.wiperdog", "org.wiperdog.jrubyrunner", "1.0").startLevel(3),
 		mavenBundle("org.wiperdog", "org.wiperdog.logstat", "1.0").startLevel(3),
 		junitBundles()
 		);
@@ -63,6 +66,9 @@ public class EventlogTest {
 	private LogStat svc;
 	private String currentDir = "";
 	private String logs_test_dir = "";
+	String wd = System.getProperty("user.dir");
+	private String logstatDir ;
+
 	TestUTCommon test_common = new TestUTCommon();
 	HashMap<String , Object> input_conf = new HashMap<String, Object>();
 	HashMap<String , Object> output_conf = new HashMap<String, Object>();
@@ -106,6 +112,8 @@ public class EventlogTest {
 			]
 		]
 		input_conf.put("input_type", "eventlog");
+		logstatDir = wd + "/src/test/resources/logstat"		
+
 	}
 
 	@After
@@ -132,8 +140,7 @@ public class EventlogTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			println "conf " + conf
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			//Check if data return is 3 records logs generated from @prepare step
 			assertTrue(test_common.countLines("src/test/resources/data_test/input/testEventlog/output/testEventlog0.output") == 3)
 		} catch(Exception ex){
@@ -159,8 +166,7 @@ public class EventlogTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			println "conf " + conf
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			//Check if data return is 3 records logs generated from @prepare step
 			assertTrue(test_common.countLines("src/test/resources/data_test/input/testEventlog/output/testEventlog1.output") == 3)
 		} catch(Exception ex){
@@ -183,8 +189,7 @@ public class EventlogTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			println "conf " + conf
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.countLines("src/test/resources/data_test/input/testEventlog/output/testEventlog1.output") == 3)
 		} catch(Exception ex){
 			println ex
@@ -225,8 +230,7 @@ public class EventlogTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			println "conf " + conf
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.countLines("src/test/resources/data_test/input/testEventlog/output/testEventlog3.output") == 2)
 		} catch(Exception ex){
 			println ex
@@ -272,8 +276,7 @@ public class EventlogTest {
 			conf.put("input",input_conf);
 			conf.put("filter",filter_conf);
 			conf.put("output",output_conf);
-			println "conf " + conf
-			svc.runLogStat(conf)
+			svc.runLogStat(logstatDir,conf)
 			assertTrue(test_common.countLines("src/test/resources/data_test/input/testEventlog/output/testEventlog4.output") >= 1)
 		} catch(Exception ex){
 			println ex
