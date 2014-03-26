@@ -1,4 +1,4 @@
-require 'logstat/ruby/main/Input'
+require "ruby/main/Input"
 require 'date'
 
 ##

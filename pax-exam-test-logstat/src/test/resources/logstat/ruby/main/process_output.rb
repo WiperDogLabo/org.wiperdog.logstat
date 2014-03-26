@@ -1,5 +1,5 @@
-require 'logstat/ruby/main/Output.rb'
-
+#Process write log to output destination and/or return data to job
+require "ruby/main/Output.rb"
 po = ProcessOutput.new
  dataFromOutput = po.output(dataFiltered,conf['output'], mapDefaultOutput)
 if(!dataFromOutput.nil?)
