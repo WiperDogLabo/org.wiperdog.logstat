@@ -18,14 +18,10 @@ import org.wiperdog.logstat.service.LogStat;
  * 
  */
 public class LogStatImpl implements LogStat {
-	Bundle bundle;
 	JrubyRunner jrService;
-
-	public LogStatImpl(Bundle bundle) {
-		this.bundle = bundle;
-		BundleContext context = bundle.getBundleContext();
-		jrService = (JrubyRunner) context.getService(context.getServiceReference(JrubyRunner.class
-				.getName()));
+	
+	public LogStatImpl(JrubyRunner jrService) {
+		this.jrService = jrService;
 	}
 
 	/**

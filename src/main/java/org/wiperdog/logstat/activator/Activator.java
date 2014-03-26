@@ -1,27 +1,46 @@
 package org.wiperdog.logstat.activator;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.wiperdog.jrubyrunner.JrubyRunner;
 import org.wiperdog.logstat.service.LogStat;
 import org.wiperdog.logstat.service.impl.LogStatImpl;
 
 public class Activator implements BundleActivator {
+	BundleContext context;
+	private ServiceTracker tracker = null;
 
 	public void start(BundleContext context) throws Exception {
-		// TODO Auto-generated method stub
-		// Bundle bundle =
-		// FrameworkUtil.getBundle(Activator.class).getBundleContext().getBundle();
-		Bundle bundle = context.getBundle();
-		context.registerService(LogStat.class.getName(),
-				new LogStatImpl(bundle), null);
-		System.out.println("LogStat Service registered !");
+		this.context = context;	
+		tracker = new ServiceTracker(this.context, JrubyRunner.class.getName(), new JrubyRunnerTracker());
+		tracker.open();
 
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		// TODO Auto-generated method stub
 
 	}
 
+	class JrubyRunnerTracker implements ServiceTrackerCustomizer {
+
+		public Object addingService(ServiceReference reference) {
+			Object service = context.getService(reference);
+			if (service instanceof JrubyRunner) {
+				synchronized (this) {
+					context.registerService(LogStat.class.getName(), new LogStatImpl((JrubyRunner) service), null);
+				}
+			}
+			return null;
+		}
+
+		public void modifiedService(ServiceReference reference, Object service) {
+		}
+
+		public void removedService(ServiceReference reference, Object service) {
+
+		}
+	}
 }
