@@ -1,6 +1,8 @@
 package org.wiperdog.logstat.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
@@ -46,26 +48,26 @@ public class LogStatImpl implements LogStat {
 			// Ruby process
 			System.out.println("LogStartService Running ...");
 			inputData.put("conf", conf);
+			inputData.put("log_stat_dir", logStatDir);
 			inputData.put("mapDefaultInput", mapDefaultInput);
 			inputData.put("mapDefaultOutput", mapDefaultOutput);
 			String procInputFile = logStatDir + "/ruby/main/process_input.rb";
 			String procFilterFile = logStatDir + "/ruby/main/process_filter.rb";
 			String procOutputFile = logStatDir + "/ruby/main/process_output.rb";
-			Object dataInput = jrService.execute(procInputFile, inputData);
+			List<String> libpaths = new ArrayList<String>();
+			libpaths.add(logStatDir);
+			Object dataInput = jrService.execute(procInputFile, inputData,libpaths);
 			if (dataInput != null) {
 				inputData.put("dataInput", dataInput);
-				Object dataFiltered = jrService.execute(procFilterFile, inputData);
+				Object dataFiltered = jrService.execute(procFilterFile, inputData,libpaths);
 				if (dataFiltered != null) {
 					inputData.put("dataFiltered", dataFiltered);
-					dataFinal = (Map<String, Object>) jrService.execute(procOutputFile, inputData);
+					dataFinal = (Map<String, Object>) jrService.execute(procOutputFile, inputData,libpaths);
 				}
 			}
 			System.out.println("LogStartService Completed ...");
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		}
-		if(dataFinal != null) {
-			System.out.println("dataFinal " + dataFinal.getClass().toString());
 		}
 		return dataFinal;
 	}

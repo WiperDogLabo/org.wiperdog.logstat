@@ -1,4 +1,4 @@
-require 'logstat/ruby/libs/Common.rb'
+require "ruby/libs/Common.rb"
 
 include CommonUtils
 

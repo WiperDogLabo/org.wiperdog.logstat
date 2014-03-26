@@ -8,8 +8,8 @@
 #@param : asc_by_fname - sort files in logs folder
 #@return list_logs - a list of logs string
 def getLogsFromFile(path,file_format,monitor_type,start_file_name,start_pos,asc_by_fname,from_date)
-  require "logstat/ruby/input/file_plaintext.rb"
-  require "logstat/ruby/input/file_csv.rb"
+  require "ruby/input/file_plaintext.rb"
+    require "ruby/input/file_csv.rb"
   
   #get data from plain_text file
   if(file_format == 'plain_text')
