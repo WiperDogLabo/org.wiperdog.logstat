@@ -85,7 +85,7 @@ public class SyslogTest {
 		// set data for log
 		inputStr = readFileOutput(wd + "/src/test/resources/data_test/input/testSyslog/messages");
 		logstatDir = wd + "/src/test/resources/logstat"		
-		FileWriter fw = new FileWriter("/home/luongnx/testSyslog")
+		FileWriter fw = new FileWriter("/usr/messages")
 		fw.write(inputStr);
 		fw.close();
 

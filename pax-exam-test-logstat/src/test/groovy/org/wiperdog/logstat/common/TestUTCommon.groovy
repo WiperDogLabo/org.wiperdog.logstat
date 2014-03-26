@@ -5,8 +5,6 @@ public class TestUTCommon {
 	public boolean compareData(String file_path1,String file_path2){
 
 		try {
-			println file_path1
-			println file_path2
 			def isEquals = false
 			def file1 = new File(file_path1);
 			def file2 = new File(file_path2);
@@ -14,10 +12,8 @@ public class TestUTCommon {
 			def data2 = file2.getText();
 
 			if(data1.equals(data2)){
-				println "return true"
 				return true;
 			}else{
-				println "return false"
 				return false;
 			}
 		} catch (Exception ex){
@@ -27,8 +23,6 @@ public class TestUTCommon {
 	public boolean cleanData(String file_path){
 		try{
 			File file = new File(file_path);
-			println file_path
-			println file.exists();
 			if(file.delete()){
 				System.out.println(file.getName() + " is deleted!");
 			}else{
@@ -50,18 +44,9 @@ public class TestUTCommon {
 	}
 	public void changeFileModifiedTime(String filePath){
 		File file = new File(filePath);
-
-		//print the original last modified date
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-		System.out.println("Original Last Modified Date : "
-				+ sdf.format(file.lastModified()));
-
 		//need convert the above date to milliseconds in long value
 		Date newDate = Calendar.getInstance().getTime();
 		file.setLastModified(newDate.getTime());
-
-		//print the latest last modified date
-		System.out.println("Lastest Last Modified Date : "
-				+ sdf.format(file.lastModified()));
 	}
 }
